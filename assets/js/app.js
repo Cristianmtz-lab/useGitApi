@@ -25,4 +25,23 @@ $searchToggler.addEventListener("click", function () {
   isExpanded = isExpanded ? false : true;
   this.setAttribute("aria-expanded", isExpanded);
   $searchField.focus();
-})
+});
+
+// tab navigation 
+
+const $tabBtns = document.querySelectorAll("[data-tab-btn]");
+const $tabPanels = document.querySelectorAll("[data-tab-panel]");
+let [$lastActiveTabBtn] = $tabBtns;
+let [$lastActiveTabPanel] = $tabPanels;
+
+addEventOnElements($tabBtns, "click", function () {
+  $lastActiveTabBtn.setAttribute("aria-selected", "false");
+  $lastActiveTabPanel.setAttribute("hidden", "");
+
+  this.setAttribute("aria-selected", "true");
+  const $currentTabPanel = document.querySelector(`#${this.getAttribute("aria-controls")}`);
+  $currentTabPanel.removeAttribute("hidden");
+
+  $lastActiveTabBtn = this;
+  $lastActiveTabPanel = $currentTabPanel;
+}); 
