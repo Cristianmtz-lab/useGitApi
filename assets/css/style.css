@@ -509,6 +509,19 @@ components
   padding: var(--spacing);
 }
 
+.follower-card .avatar-circle{
+  width: 56px;
+  height: 56px;
+  flex-shrink: 0;
+}
+
+.follower-card .icon-btn {margin-inline-start: auto;}
+
+.follower-card .card-title {
+  font-size: var(--body);
+  font-weight: var(--weight-regular);
+}
+
 /*repository card*/
 
 .repo-card {
