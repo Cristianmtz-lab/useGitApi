@@ -1,6 +1,7 @@
 "use strict";
 
 import { fetchData } from "./api.js";
+import { numberToKilo } from "./module.js";
 
 const addEventOnElements = function ($elements, eventType, callback) {
   for (const $element of $elements) {
@@ -193,10 +194,10 @@ window.updateProfile = function (profileUrl) {
           <span class="body">${public_repos}</span>Repos
         </li>
         <li class="stats-item">
-          <span class="body">${followers}</span>Followers
+          <span class="body">${numberToKilo(followers)}</span>Followers
         </li>
         <li class="stats-item">
-          <span class="body">${following}</span>Following
+          <span class="body">${numberToKilo(following)}</span>Following
         </li>
       </ul>
 
@@ -204,6 +205,8 @@ window.updateProfile = function (profileUrl) {
         <p class="copyright">&copy; 2025 CristinMtzLab</p>
       </div>
     `;
+
+    updateRepository();
   }, () => {
     $error.style.display = "grid";
     document.body.style.overflowY = "hidden";
@@ -219,3 +222,88 @@ window.updateProfile = function (profileUrl) {
 }
 
 updateProfile(apiURl);
+
+// repository
+
+let forkedRepos = [];
+
+const updateRepository = function () {
+  fetchData(`${repoUrl}?sort=created&per_page=12`, function (data) {
+
+    console.log(data);
+
+    $repoPanel.innerHTML = `<h2 class="sr-only">Repositories</h2>`;
+    forkedRepos = data.filter(item => item.fork);
+
+    const repositories = data.filter(i => !i.fork);
+
+    if (repositories.length) {
+      for (const repo of repositories) {
+        const {
+          name,
+          html_url,
+          description,
+          private: isPrivate,
+          language,
+          stargazers_count: stars_count,
+          forks_count
+        } = repo;
+
+        const $repoCard = document.createElement("article");
+        $repoCard.classList.add("card", "repo-card");
+
+        $repoCard.innerHTML = `
+          <div class="card-body">
+            <a href="${html_url}" target="_blank" class="card-title">
+              <h3 class="title-3">${name}</h3>
+            </a>
+
+            ${description ?
+            `<p class="card-text">${description}</p>` : ""
+          }
+
+            <span class="badge">${isPrivate ? "Private" : "Public"}</span>
+          </div>
+
+          <div class="card-footer">
+          ${language ?
+            `<div class="meta-item">
+              <span class="material-symbols-outlined" aria-hidden="true">code_blocks</span>
+              <span class="span">${language}</span>
+            </div>` : ""
+          }
+
+            <div class="meta-item">
+              <span class="material-symbols-outlined" aria-hidden="true">star_rate</span>
+              <span class="span">${numberToKilo(stars_count)}</span>
+            </div>
+
+            <div class="meta-item">
+              <span class="material-symbols-outlined" aria-hidden="true">family_history</span>
+              <span class="span">${numberToKilo(forks_count)}</span>
+            </div>
+          </div>
+        `;
+
+        $repoPanel.appendChild($repoCard)
+      }
+    } else {
+      $repoPanel.innerHTML = `
+        <div class="error-content">
+          <p class="title-1">Oops! :(</p>
+          <p class="text">Doesn't have any public repositories  yet.</p>
+        </div>
+      `;
+    }
+  });
+}
+
+
+// forked repository
+
+const $fortedPanel = document.querySelector("[data-fork-panel]");
+const $forkTabNtn = document.querySelector("[data-forked-tab-btn]");
+
+const updateForkRepo = function () {
+  $fortedPanel.innerHTML = `<h2 class="sr-only">Forked repositories</h2>`;
+}
