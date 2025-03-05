@@ -128,8 +128,6 @@ window.updateProfile = function (profileUrl) {
 
   fetchData(profileUrl, data => {
 
-    console.log(data)
-
     const {
       type,
       avatar_url,
@@ -229,8 +227,6 @@ let forkedRepos = [];
 
 const updateRepository = function () {
   fetchData(`${repoUrl}?sort=created&per_page=12`, function (data) {
-
-    console.log(data);
 
     $repoPanel.innerHTML = `<h2 class="sr-only">Repositories</h2>`;
     forkedRepos = data.filter(item => item.fork);
@@ -402,7 +398,7 @@ const updateFollower = function () {
 
         $followerCard.innerHTML = `
           <figure class="avatar-circle img-holder" >
-            <img src="${avatar_url}" alt="${username}" loading="lazy" width="56" height="56" class="img-cover">
+            <img src="${avatar_url}&s=64" alt="${username}" loading="lazy" width="56" height="56" class="img-cover">
           </figure>
 
           <h3 class="card-title">${username}</h3>
@@ -427,3 +423,60 @@ const updateFollower = function () {
 }
 
 $followerTabBtn.addEventListener("click", updateFollower);
+
+// following
+
+const $followingTabBtn = document.querySelector("[data-following-tab-btn]");
+const $followingPanel = document.querySelector("[data-following-panel]");
+
+const updateFollowing = function () {
+
+  $followingPanel.innerHTML = `
+    <div class="card follower-skeleton">
+      <div class="skeleton avatar-skeleton"></div>
+      <div class="skeleton title-skeleton"></div>
+    </div>
+  `.repeat(12);
+
+  fetchData(followingUrl, function (data) {
+
+    $followingPanel.innerHTML = `<h2 class="sr-only">Followers</h2>`;
+
+    if (data.length) {
+      for (const item of data) {
+
+        const {
+          login: username,
+          avatar_url,
+          url
+        } = item;
+
+        const $followingCard = document.createElement("article");
+        $followingCard.classList.add("card", "follower-card");
+
+        $followingCard.innerHTML = `
+          <figure class="avatar-circle img-holder" >
+            <img src="${avatar_url}&s=64" alt="${username}" loading="lazy" width="56" height="56" class="img-cover">
+          </figure>
+
+          <h3 class="card-title">${username}</h3>
+
+          <button class="icon-btn" onclick="updateProfile(\'${url}\')" aria-label="Go to ${username} profile">
+            <span class="material-symbols-outlined" aria-hidden="true">link</span>
+          </button>
+        `;
+
+        $followingPanel.appendChild($followingCard);
+      }
+    } else {
+      $followingPanel.innerHTML = `
+        <div class="error-content">
+            <p class="title-1">Oops! :(</p>
+            <p class="text">Doesn't have any following yet.</p>
+          </div>
+      `;
+    }
+  })
+}
+
+$followingTabBtn.addEventListener("click", updateFollowing);
